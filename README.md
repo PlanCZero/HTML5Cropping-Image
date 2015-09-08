@@ -1,3 +1,24 @@
+Image zoom and crop by using html5 canvas and jQuery slider ui.
+===================
+The reason is I want to use zoom in or zoom out to crop instead of resize image.
+
+// =============== Thank you for original awesome code from the link below ========================
+
+░░░░░░░░░░░░▄▄
+░░░░░░░░░░░█░░█
+░░░░░░░░░░░█░░█
+░░░░░░░░░░█░░░█
+░░░░░░░░░█░░░░█
+███████▄▄█░░░░░██████▄
+▓▓▓▓▓▓█░░░░░░░░░░░░░░█
+▓▓▓▓▓▓█░░░░░░░░░░░░░░█
+▓▓▓▓▓▓█░░░░░░░░░░░░░░█
+▓▓▓▓▓▓█░░░░░░░░░░░░░░█
+▓▓▓▓▓▓█░░░░░░░░░░░░░░█
+▓▓▓▓▓▓█████░░░░░░░░░█
+██████▀░░░░▀▀██████▀
+
+
 Image Resizing with Canvas
 =========
 
@@ -12,7 +33,7 @@ This demo is required to run on local server. If you don't have one you might tr
 https://www.apachefriends.org/
 http://www.wampserver.com/en/
 
-Integrate or build upon it for free in your personal or commercial projects. Don't republish, redistribute or sell "as-is". 
+Integrate or build upon it for free in your personal or commercial projects. Don't republish, redistribute or sell "as-is".
 
 Read more here: [License](http://tympanus.net/codrops/licensing/)
 
