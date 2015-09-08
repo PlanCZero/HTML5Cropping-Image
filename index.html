@@ -1,0 +1,60 @@
+﻿<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Image Resizing with Canvas</title>
+    <meta name="description" content="Learn how to resize images using JavaScript and the HTML5 Canvas element using controls, commonly seen in photo editing applications." />
+    <meta name="keywords" content="canvas, javascript, HTML5, resizing, images" />
+    <meta name="author" content="Codrops" />
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" type="text/css" href="css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="css/demo.css" />
+    <link rel="stylesheet" type="text/css" href="css/component.css" />
+    <!--[if IE]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="http://static.jquery.com/ui/css/demo-docs-theme/ui.theme.css" type="text/css" media="all" />
+    
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <br />
+            <div class="component">
+                <div class="overlay" style="height:200px;width:300px;">
+                    <div class="overlay-inner">
+                    </div>
+                </div>
+                <img class="resize-image" src="img/image.jpg" alt="image for resizing">
+            </div>
+            <div class="control-panal">
+                
+                <div>
+                    <input type="button" value="Fit Width" id="fitWidth" data-width="300" />
+                    <input type="button" value="Fit Height" id="fitHeight" data-height="200"/>
+                    <input id="reset" type="button" value="Reset" />
+                    <hr/>
+                    <div>
+                        <!--<button id="ZoomIn">Zoom in</button>
+                        <button id="ZoomOut">Zoom Out</button>-->
+                        <div id="slider"></div>
+                        <input type="text" id="slider_value" style="border:0; color:#f6931f; font-weight:bold;" />
+                    </div>
+                    <!--<span><input type="checkbox" /> Free space</span>-->
+                    <hr />
+                    <input type="button" value="Submit" id="submitCrop"/>
+                    <input type="button" value="Cancle" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="js/jquery-2.1.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+
+    <script src="js/component.js"></script>
+ 
+</body>
+</html>
