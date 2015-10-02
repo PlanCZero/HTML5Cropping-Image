@@ -15,6 +15,7 @@ var resizeableImage = function (image_target) {
         max_height = 900,
         resize_canvas = document.createElement('canvas'),
         zoomDelta = 0.01,
+        disableSlide = false,
         currentScale = 1;
 
     init = function () {
@@ -37,8 +38,8 @@ var resizeableImage = function (image_target) {
         $container.on('mousedown touchstart', 'img', startMoving);
         $('#submitCrop').on('click', crop);
 
-        $('#ZoomIn').on('click', zoomin);
-        $('#ZoomOut').on('click', zoomout);
+        // $('#ZoomIn').on('click', zoomin);
+        // $('#ZoomOut').on('click', zoomout);
         $('#reset').on('click', function () {
             reset();
         });
@@ -46,6 +47,9 @@ var resizeableImage = function (image_target) {
         $('#fitWidth').on('click', fitwidth);
         $('#fitHeight').on('click', fitheight);
 
+        initSlide();
+    };
+    initSlide = function () {
         $("#slider").slider({
             orientation: "vertical",
             value: 100,
@@ -53,13 +57,28 @@ var resizeableImage = function (image_target) {
             max: 200,
             step: 1,
             slide: function (event, ui) {
-                $("#slider_value").val(ui.value+'%');
-                zoom(ui.value);
+                if (disableSlide == false) {
+
+                    zoom(ui.value);
+                }
+                else {
+                    return false;
+                }
+            },
+            start: function (event, ui) {
+                var box_width = $('.overlay').width(),
+                  box_height = $('.overlay').height();
+                  console.log('w:'+resize_canvas.width+'->box_w:'+(box_width)+'   h : '+resize_canvas.height+'->box_h:'+(box_height));
+                if (resize_canvas.width >= box_width || resize_canvas.height >= box_height) {
+                    disableSlide = false;
+                }
+            },
+            stop: function (event, ui) {
+                resizeImage(resize_canvas.width, resize_canvas.height);
             }
         });
-        $("#slider_value").val($("#slider").slider("value")+'%');
+        $("#slider_value").val($("#slider").slider("value") + '%');
     };
-
     startResize = function (e) {
         e.preventDefault();
         e.stopPropagation();
@@ -143,75 +162,82 @@ var resizeableImage = function (image_target) {
     //    }
     //}
     reset = function () {
-        $("#slider").slider({
-            orientation: "vertical",
-            value: 100,
-            min: 0,
-            max: 200,
-            step: 1,
-            slide: function (event, ui) {
-                $("#slider_value").val(ui.value);
-                zoom(ui.value);
-            }
-        });
-        $("#slider_value").val($("#slider").slider("value"));
+        initSlide();
         currentScale = 1;
-        resize_canvas.width = orig_src.width;
-        resize_canvas.height = orig_src.height;
-        resize_canvas.getContext('2d').drawImage(orig_src, 0, 0, orig_src.width, orig_src.height);
-        $(image_target).attr('src', resize_canvas.toDataURL("image/png"));
+        $(image_target).removeAttr('style');
+        resizeImage(orig_src.width, orig_src.height)
     };
     zoom = function (scale) {
         var w = orig_src.width;
         var h = orig_src.height;
-        
-        currentScale = scale / 100;
-        var _w = (w * (currentScale < 1 ? 100 - (currentScale * 100) : (currentScale - 1) * 100)) / 100;
-        var _h = (h * (currentScale < 1 ? 100 - (currentScale * 100) : (currentScale - 1) * 100)) / 100;
-        resize_canvas.width = (w + _w);
-        resize_canvas.height = (h + _h);
 
-        var mmx = resize_canvas.getContext('2d');
-        mmx.scale(currentScale, currentScale);
-        mmx.drawImage(orig_src, 0, 0, w, h);
-        $(image_target).on("load", function () {
-            // image loaded here
-        }).attr("src", resize_canvas.toDataURL("image/png"));
-    };
-    zoomin = function () {
-        var w = orig_src.width;
-        var h = orig_src.height;
-        currentScale += zoomDelta;
-        console.log(currentScale);
+        currentScale = scale / 100;
+
+
+
+
         var _w = (w * (currentScale < 1 ? 100 - (currentScale * 100) : (currentScale - 1) * 100)) / 100;
         var _h = (h * (currentScale < 1 ? 100 - (currentScale * 100) : (currentScale - 1) * 100)) / 100;
-        resize_canvas.width = (w + _w);
-        resize_canvas.height = (h + _h);
-        var mmx = resize_canvas.getContext('2d');
-        mmx.scale(currentScale, currentScale);
-        mmx.drawImage(orig_src, 0, 0, w, h);
-        $(image_target).attr('src', resize_canvas.toDataURL("image/png"));
+
+        var box_width = $('.overlay').width(),
+          box_height = $('.overlay').height();
+
+        if (currentScale > 1) {
+            $(image_target).css({ 'width': w + _w + 'px', 'height': h + _h + 'px' });
+            resize_canvas.width = (w + _w);
+            resize_canvas.height = (h + _h);
+        } else if (currentScale < 1) {
+            console.log('scale<1');
+            console.log('w:'+(w-_w)+'-->box_w:'+box_width);
+            console.log('h:'+(h-_h)+'-->box_h:'+box_height);
+            if ((w - _w) <= (box_width + 12) || (h - _h) <= (box_height + 12)) {
+                disableSlide = true;
+                return false;
+            }
+            console.log(disableSlide);
+            $(image_target).css({ 'width': w - _w + 'px', 'height': h - _h + 'px' });
+            resize_canvas.width = (w - _w);
+            resize_canvas.height = (h - _h);
+        } else {
+            $(image_target).css({ 'width': w + 'px', 'height': h + 'px' });
+            resize_canvas.width = (w);
+            resize_canvas.height = (h);
+        }
+          $("#slider_value").val(scale+ '%');
     };
-    zoomout = function () {
-        var w = orig_src.width;
-        var h = orig_src.height;
-        currentScale -= zoomDelta;
-        var _w = (w * (currentScale < 1 ? 100 - (currentScale * 100) : (currentScale - 1) * 100)) / 100;
-        var _h = (h * (currentScale < 1 ? 100 - (currentScale * 100) : (currentScale - 1) * 100)) / 100;
-        resize_canvas.width = (w + _w);
-        resize_canvas.height = (h + _h);
-        var mmx = resize_canvas.getContext('2d');
-        mmx.scale(currentScale, currentScale);
-        mmx.drawImage(orig_src, 0, 0, w, h);
-        $(image_target).attr('src', resize_canvas.toDataURL("image/png"));
-    };
+    // zoomin = function () {
+    //     var w = orig_src.width;
+    //     var h = orig_src.height;
+    //     currentScale += zoomDelta;
+    //     console.log(currentScale);
+    //     var _w = (w * (currentScale < 1 ? 100 - (currentScale * 100) : (currentScale - 1) * 100)) / 100;
+    //     var _h = (h * (currentScale < 1 ? 100 - (currentScale * 100) : (currentScale - 1) * 100)) / 100;
+    //     resize_canvas.width = (w + _w);
+    //     resize_canvas.height = (h + _h);
+    //     var mmx = resize_canvas.getContext('2d');
+    //     mmx.scale(currentScale, currentScale);
+    //     mmx.drawImage(orig_src, 0, 0, w, h);
+    //     $(image_target).attr('src', resize_canvas.toDataURL("image/png"));
+    // };
+    // zoomout = function () {
+    //     var w = orig_src.width;
+    //     var h = orig_src.height;
+    //     currentScale -= zoomDelta;
+    //     var _w = (w * (currentScale < 1 ? 100 - (currentScale * 100) : (currentScale - 1) * 100)) / 100;
+    //     var _h = (h * (currentScale < 1 ? 100 - (currentScale * 100) : (currentScale - 1) * 100)) / 100;
+    //     resize_canvas.width = (w + _w);
+    //     resize_canvas.height = (h + _h);
+    //     var mmx = resize_canvas.getContext('2d');
+    //     mmx.scale(currentScale, currentScale);
+    //     mmx.drawImage(orig_src, 0, 0, w, h);
+    //     $(image_target).attr('src', resize_canvas.toDataURL("image/png"));
+    // };
     fitwidth = function (e) {
         var w = $(e.currentTarget).data('width');
         var h = image_target.height;
         resize_canvas.width = w;
         resize_canvas.height = h;
         var mmx = resize_canvas.getContext('2d');
-
         mmx.drawImage(orig_src, 0, 0, w, h);
         $(image_target).attr('src', resize_canvas.toDataURL("image/png"));
     }
@@ -222,11 +248,15 @@ var resizeableImage = function (image_target) {
         resize_canvas.width = w;
         resize_canvas.height = h;
         var mmx = resize_canvas.getContext('2d');
-
         mmx.drawImage(orig_src, 0, 0, w, h);
         $(image_target).attr('src', resize_canvas.toDataURL("image/png"));
     }
-
+    resizeImage = function (width, height) {
+        resize_canvas.width = width;
+        resize_canvas.height = height;
+        resize_canvas.getContext('2d').drawImage(orig_src, 0, 0, width, height);
+        $(image_target).attr('src', resize_canvas.toDataURL("image/png"));
+    };
     startMoving = function (e) {
         e.preventDefault();
         e.stopPropagation();
