@@ -66,6 +66,7 @@ a {
     overflow: hidden;
     /*margin: 0 auto;*/
     float: left;
+    min-width: 755px;
 }
 
 .control-panal {

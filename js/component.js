@@ -1,12 +1,16 @@
 //if (window.location.protocol == 'file:') {
 //    alert('To test this demo properly please use a local server such as XAMPP or WAMP. See README.md for more details.');
 //}
+function test() {
+    alert('xxxxx');
+}
 
 var resizeableImage = function (image_target) {
     // Some variable and settings
     var $container,
         orig_src = new Image(),
         image_target = $(image_target).get(0),
+        $overlay = $('.overlay'),
         event_state = {},
         constrain = false,
         min_width = 100, // Change as required
@@ -29,16 +33,20 @@ var resizeableImage = function (image_target) {
         // .after('<span class="resize-handle resize-handle-se"></span>')
         // .after('<span class="resize-handle resize-handle-sw"></span>');
 
+        $overlay.html('<div class="overlay-inner"></div>');
+        $('.overlay-inner')
+        .before('<span class="resize-handle resize-handle-nw"></span>')
+        .before('<span class="resize-handle resize-handle-ne"></span>')
+        .after('<span class="resize-handle resize-handle-se"></span>')
+        .after('<span class="resize-handle resize-handle-sw"></span>');
+
         // Assign the container to a variable
         $container = $(image_target).parent('.resize-container');
 
         // Add events
-        $container.on('mousedown touchstart', '.resize-handle', startResize);
         $container.on('mousedown touchstart', 'img', startMoving);
+        //$overlay.on('mousedown touchstart', '.resize-handle', startResize);
         $('#submitCrop').on('click', crop);
-
-        // $('#ZoomIn').on('click', zoomin);
-        // $('#ZoomOut').on('click', zoomout);
         $('#reset').on('click', function () {
             reset();
         });
@@ -47,6 +55,10 @@ var resizeableImage = function (image_target) {
         $('#fitHeight').on('click', fitheight);
 
         initSlide();
+        $container.offset({
+            'left': 0,
+            'top': 0
+        });
     };
     initSlide = function () {
         // Get croping box size.
@@ -114,52 +126,52 @@ var resizeableImage = function (image_target) {
         event_state.evnt = e;
     };
 
-    //resizing = function (e) {
-    //    var mouse = {}, width, height, left, top, offset = $container.offset();
-    //    mouse.x = (e.clientX || e.pageX || e.originalEvent.touches[0].clientX) + $(window).scrollLeft();
-    //    mouse.y = (e.clientY || e.pageY || e.originalEvent.touches[0].clientY) + $(window).scrollTop();
+    resizing = function (e) {
+        var mouse = {}, width, height, left, top, offset = $container.offset();
+        mouse.x = (e.clientX || e.pageX || e.originalEvent.touches[0].clientX) + $(window).scrollLeft();
+        mouse.y = (e.clientY || e.pageY || e.originalEvent.touches[0].clientY) + $(window).scrollTop();
 
-    //    // Position image differently depending on the corner dragged and constraints
-    //    if ($(event_state.evnt.target).hasClass('resize-handle-se')) {
-    //        width = mouse.x - event_state.container_left;
-    //        height = mouse.y - event_state.container_top;
-    //        left = event_state.container_left;
-    //        top = event_state.container_top;
-    //    } else if ($(event_state.evnt.target).hasClass('resize-handle-sw')) {
-    //        width = event_state.container_width - (mouse.x - event_state.container_left);
-    //        height = mouse.y - event_state.container_top;
-    //        left = mouse.x;
-    //        top = event_state.container_top;
-    //    } else if ($(event_state.evnt.target).hasClass('resize-handle-nw')) {
-    //        width = event_state.container_width - (mouse.x - event_state.container_left);
-    //        height = event_state.container_height - (mouse.y - event_state.container_top);
-    //        left = mouse.x;
-    //        top = mouse.y;
-    //        if (constrain || e.shiftKey) {
-    //            top = mouse.y - ((width / orig_src.width * orig_src.height) - height);
-    //        }
-    //    } else if ($(event_state.evnt.target).hasClass('resize-handle-ne')) {
-    //        width = mouse.x - event_state.container_left;
-    //        height = event_state.container_height - (mouse.y - event_state.container_top);
-    //        left = event_state.container_left;
-    //        top = mouse.y;
-    //        if (constrain || e.shiftKey) {
-    //            top = mouse.y - ((width / orig_src.width * orig_src.height) - height);
-    //        }
-    //    }
+        // Position image differently depending on the corner dragged and constraints
+        if ($(event_state.evnt.target).hasClass('resize-handle-se')) {
+            width = mouse.x - event_state.container_left;
+            height = mouse.y - event_state.container_top;
+            left = event_state.container_left;
+            top = event_state.container_top;
+        } else if ($(event_state.evnt.target).hasClass('resize-handle-sw')) {
+            width = event_state.container_width - (mouse.x - event_state.container_left);
+            height = mouse.y - event_state.container_top;
+            left = mouse.x;
+            top = event_state.container_top;
+        } else if ($(event_state.evnt.target).hasClass('resize-handle-nw')) {
+            width = event_state.container_width - (mouse.x - event_state.container_left);
+            height = event_state.container_height - (mouse.y - event_state.container_top);
+            left = mouse.x;
+            top = mouse.y;
+            if (constrain || e.shiftKey) {
+                top = mouse.y - ((width / orig_src.width * orig_src.height) - height);
+            }
+        } else if ($(event_state.evnt.target).hasClass('resize-handle-ne')) {
+            width = mouse.x - event_state.container_left;
+            height = event_state.container_height - (mouse.y - event_state.container_top);
+            left = event_state.container_left;
+            top = mouse.y;
+            if (constrain || e.shiftKey) {
+                top = mouse.y - ((width / orig_src.width * orig_src.height) - height);
+            }
+        }
 
-    //    // Optionally maintain aspect ratio
-    //    if (constrain || e.shiftKey) {
-    //        height = width / orig_src.width * orig_src.height;
-    //    }
+        // Optionally maintain aspect ratio
+        if (constrain || e.shiftKey) {
+            height = width / orig_src.width * orig_src.height;
+        }
 
-    //    if (width > min_width && height > min_height && width < max_width && height < max_height) {
-    //        // To improve performance you might limit how often resizeImage() is called
-    //        resizeImage(400, 400);
-    //        // Without this Firefox will not re-calculate the the image dimensions until drag end
-    //        $container.offset({ 'left': left, 'top': top });
-    //    }
-    //}
+        if (width > min_width && height > min_height && width < max_width && height < max_height) {
+            // To improve performance you might limit how often resizeImage() is called
+            resizeImage(400, 400);
+            // Without this Firefox will not re-calculate the the image dimensions until drag end
+            $container.offset({ 'left': left, 'top': top });
+        }
+    }
     reset = function () {
         initSlide();
         currentScale = 1;
@@ -189,6 +201,7 @@ var resizeableImage = function (image_target) {
         }
     };
     fitwidth = function (e) {
+        initSlide();
         var box_width = $('.overlay').width(), box_height = $('.overlay').height(), left = $('.overlay').offset().left, top = $('.overlay').offset().top;
         $(image_target).css({ 'width': (box_width + 5) + 'px' });
         $container.offset({
@@ -198,6 +211,7 @@ var resizeableImage = function (image_target) {
         resizeImage((box_width + 5), box_height);
     }
     fitheight = function (e) {
+        initSlide();
         var box_width = $('.overlay').width(), box_height = $('.overlay').height(), left = $('.overlay').offset().left, top = $('.overlay').offset().top;
         $(image_target).css({ 'height': (box_height + 5) + 'px' });
         $container.offset({
@@ -239,15 +253,21 @@ var resizeableImage = function (image_target) {
 
             var _left = mouse.x - (event_state.mouse_x - event_state.container_left);
             var _top = mouse.y - (event_state.mouse_y - event_state.container_top);
-            if (_left <= 0) return false;
-            else $container.offset({
-                'left': _left
-            });
-            if (_top <= 0) return false;
-            else $container.offset({
+
+            // Not allow to drag out of the box.
+            // if (_left <= 0) return false;
+            // else $container.offset({
+            //     'left': _left
+            // });
+            // if (_top <= 0) return false;
+            // else $container.offset({
+            //     'top': _top
+            // });
+            // Allow to drag out of the box.
+            $container.offset({
+                'left': _left,
                 'top': _top
             });
-
             // Watch for pinch zoom gesture while moving
             if (event_state.touches && event_state.touches.length > 1 && touches.length > 1) {
                 var width = event_state.container_width, height = event_state.container_height;

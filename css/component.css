@@ -3,7 +3,7 @@
     display: inline-block;
     cursor: move;
     margin: 0 auto;
-    width:620px;
+    width: 620px;
 }
 
     .resize-container img {
@@ -15,7 +15,7 @@
         /*outline: 2px dashed rgba(222,60,80,.9);*/
     }
 
-/*.resize-handle-ne,
+.resize-handle-ne,
 .resize-handle-se,
 .resize-handle-nw,
 .resize-handle-sw {
@@ -49,7 +49,7 @@
     bottom: -5px;
     right: -5px;
     cursor: se-resize;
-}*/
+}
 
 .overlay {
     position: absolute;
@@ -132,6 +132,7 @@
         vertical-align: middle;
         margin-left: 8px;
     }
+
 .ui-slider-vertical {
-height:270px!important;
+    height: 270px !important;
 }
