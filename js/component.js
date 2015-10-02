@@ -15,7 +15,6 @@ var resizeableImage = function (image_target) {
         max_height = 900,
         resize_canvas = document.createElement('canvas'),
         zoomDelta = 0.01,
-        disableSlide = false,
         currentScale = 1;
 
     init = function () {
@@ -50,6 +49,12 @@ var resizeableImage = function (image_target) {
         initSlide();
     };
     initSlide = function () {
+        // Get croping box size.
+        var box_width = $('.overlay').width(), box_height = $('.overlay').height();
+        //  slide nubmer is in between 1-200
+        //  Key is find min slide number
+        var min_width = (box_width / orig_src.width) * 100;
+        var min_height = (box_height / orig_src.height) * 100;
         $("#slider").slider({
             orientation: "vertical",
             value: 100,
@@ -57,21 +62,15 @@ var resizeableImage = function (image_target) {
             max: 200,
             step: 1,
             slide: function (event, ui) {
-                if (disableSlide == false) {
-
+                if (ui.value >= Math.ceil(min_width) || ui.value >= Math.ceil(min_height)) {
                     zoom(ui.value);
-                }
-                else {
+                    $("#slider_value").val(ui.value + '%');
+                } else {
                     return false;
                 }
             },
             start: function (event, ui) {
-                var box_width = $('.overlay').width(),
-                  box_height = $('.overlay').height();
-                  console.log('w:'+resize_canvas.width+'->box_w:'+(box_width)+'   h : '+resize_canvas.height+'->box_h:'+(box_height));
-                if (resize_canvas.width >= box_width || resize_canvas.height >= box_height) {
-                    disableSlide = false;
-                }
+                //console.log('start slide');
             },
             stop: function (event, ui) {
                 resizeImage(resize_canvas.width, resize_canvas.height);
@@ -168,14 +167,7 @@ var resizeableImage = function (image_target) {
         resizeImage(orig_src.width, orig_src.height)
     };
     zoom = function (scale) {
-        var w = orig_src.width;
-        var h = orig_src.height;
-
-        currentScale = scale / 100;
-
-
-
-
+        var w = orig_src.width, h = orig_src.height, currentScale = scale / 100;
         var _w = (w * (currentScale < 1 ? 100 - (currentScale * 100) : (currentScale - 1) * 100)) / 100;
         var _h = (h * (currentScale < 1 ? 100 - (currentScale * 100) : (currentScale - 1) * 100)) / 100;
 
@@ -187,14 +179,6 @@ var resizeableImage = function (image_target) {
             resize_canvas.width = (w + _w);
             resize_canvas.height = (h + _h);
         } else if (currentScale < 1) {
-            console.log('scale<1');
-            console.log('w:'+(w-_w)+'-->box_w:'+box_width);
-            console.log('h:'+(h-_h)+'-->box_h:'+box_height);
-            if ((w - _w) <= (box_width + 12) || (h - _h) <= (box_height + 12)) {
-                disableSlide = true;
-                return false;
-            }
-            console.log(disableSlide);
             $(image_target).css({ 'width': w - _w + 'px', 'height': h - _h + 'px' });
             resize_canvas.width = (w - _w);
             resize_canvas.height = (h - _h);
@@ -203,53 +187,24 @@ var resizeableImage = function (image_target) {
             resize_canvas.width = (w);
             resize_canvas.height = (h);
         }
-          $("#slider_value").val(scale+ '%');
     };
-    // zoomin = function () {
-    //     var w = orig_src.width;
-    //     var h = orig_src.height;
-    //     currentScale += zoomDelta;
-    //     console.log(currentScale);
-    //     var _w = (w * (currentScale < 1 ? 100 - (currentScale * 100) : (currentScale - 1) * 100)) / 100;
-    //     var _h = (h * (currentScale < 1 ? 100 - (currentScale * 100) : (currentScale - 1) * 100)) / 100;
-    //     resize_canvas.width = (w + _w);
-    //     resize_canvas.height = (h + _h);
-    //     var mmx = resize_canvas.getContext('2d');
-    //     mmx.scale(currentScale, currentScale);
-    //     mmx.drawImage(orig_src, 0, 0, w, h);
-    //     $(image_target).attr('src', resize_canvas.toDataURL("image/png"));
-    // };
-    // zoomout = function () {
-    //     var w = orig_src.width;
-    //     var h = orig_src.height;
-    //     currentScale -= zoomDelta;
-    //     var _w = (w * (currentScale < 1 ? 100 - (currentScale * 100) : (currentScale - 1) * 100)) / 100;
-    //     var _h = (h * (currentScale < 1 ? 100 - (currentScale * 100) : (currentScale - 1) * 100)) / 100;
-    //     resize_canvas.width = (w + _w);
-    //     resize_canvas.height = (h + _h);
-    //     var mmx = resize_canvas.getContext('2d');
-    //     mmx.scale(currentScale, currentScale);
-    //     mmx.drawImage(orig_src, 0, 0, w, h);
-    //     $(image_target).attr('src', resize_canvas.toDataURL("image/png"));
-    // };
     fitwidth = function (e) {
-        var w = $(e.currentTarget).data('width');
-        var h = image_target.height;
-        resize_canvas.width = w;
-        resize_canvas.height = h;
-        var mmx = resize_canvas.getContext('2d');
-        mmx.drawImage(orig_src, 0, 0, w, h);
-        $(image_target).attr('src', resize_canvas.toDataURL("image/png"));
+        var box_width = $('.overlay').width(), box_height = $('.overlay').height(), left = $('.overlay').offset().left, top = $('.overlay').offset().top;
+        $(image_target).css({ 'width': (box_width + 5) + 'px' });
+        $container.offset({
+            'left': left,
+            'top': top
+        });
+        resizeImage((box_width + 5), box_height);
     }
     fitheight = function (e) {
-        var h = $(e.currentTarget).data('height');
-        var w = image_target.width;
-
-        resize_canvas.width = w;
-        resize_canvas.height = h;
-        var mmx = resize_canvas.getContext('2d');
-        mmx.drawImage(orig_src, 0, 0, w, h);
-        $(image_target).attr('src', resize_canvas.toDataURL("image/png"));
+        var box_width = $('.overlay').width(), box_height = $('.overlay').height(), left = $('.overlay').offset().left, top = $('.overlay').offset().top;
+        $(image_target).css({ 'height': (box_height + 5) + 'px' });
+        $container.offset({
+            'left': left,
+            'top': top
+        });
+        resizeImage(box_width, (box_height + 5));
     }
     resizeImage = function (width, height) {
         resize_canvas.width = width;
@@ -272,39 +227,52 @@ var resizeableImage = function (image_target) {
     };
 
     moving = function (e) {
-        var mouse = {}, touches;
-        e.preventDefault();
-        e.stopPropagation();
+        try {
+            var mouse = {}, touches;
+            e.preventDefault();
+            e.stopPropagation();
 
-        touches = e.originalEvent.touches;
+            touches = e.originalEvent.touches;
 
-        mouse.x = (e.clientX || e.pageX || touches[0].clientX) + $(window).scrollLeft();
-        mouse.y = (e.clientY || e.pageY || touches[0].clientY) + $(window).scrollTop();
-        $container.offset({
-            'left': mouse.x - (event_state.mouse_x - event_state.container_left),
-            'top': mouse.y - (event_state.mouse_y - event_state.container_top)
-        });
-        // Watch for pinch zoom gesture while moving
-        if (event_state.touches && event_state.touches.length > 1 && touches.length > 1) {
-            var width = event_state.container_width, height = event_state.container_height;
-            var a = event_state.touches[0].clientX - event_state.touches[1].clientX;
-            a = a * a;
-            var b = event_state.touches[0].clientY - event_state.touches[1].clientY;
-            b = b * b;
-            var dist1 = Math.sqrt(a + b);
+            mouse.x = (e.clientX || e.pageX || touches[0].clientX) + $(window).scrollLeft();
+            mouse.y = (e.clientY || e.pageY || touches[0].clientY) + $(window).scrollTop();
 
-            a = e.originalEvent.touches[0].clientX - touches[1].clientX;
-            a = a * a;
-            b = e.originalEvent.touches[0].clientY - touches[1].clientY;
-            b = b * b;
-            var dist2 = Math.sqrt(a + b);
+            var _left = mouse.x - (event_state.mouse_x - event_state.container_left);
+            var _top = mouse.y - (event_state.mouse_y - event_state.container_top);
+            if (_left <= 0) return false;
+            else $container.offset({
+                'left': _left
+            });
+            if (_top <= 0) return false;
+            else $container.offset({
+                'top': _top
+            });
 
-            var ratio = dist2 / dist1;
+            // Watch for pinch zoom gesture while moving
+            if (event_state.touches && event_state.touches.length > 1 && touches.length > 1) {
+                var width = event_state.container_width, height = event_state.container_height;
+                var a = event_state.touches[0].clientX - event_state.touches[1].clientX;
+                a = a * a;
+                var b = event_state.touches[0].clientY - event_state.touches[1].clientY;
+                b = b * b;
+                var dist1 = Math.sqrt(a + b);
 
-            width = width * ratio;
-            height = height * ratio;
-            // To improve performance you might limit how often resizeImage() is called
-            resizeImage(width, height);
+                a = e.originalEvent.touches[0].clientX - touches[1].clientX;
+                a = a * a;
+                b = e.originalEvent.touches[0].clientY - touches[1].clientY;
+                b = b * b;
+                var dist2 = Math.sqrt(a + b);
+
+                var ratio = dist2 / dist1;
+
+                width = width * ratio;
+                height = height * ratio;
+                // To improve performance you might limit how often resizeImage() is called
+                resizeImage(width, height);
+            }
+        }
+        catch (err) {
+            console.log(err.message);
         }
     };
 
