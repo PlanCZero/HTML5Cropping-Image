@@ -1,10 +1,6 @@
 //if (window.location.protocol == 'file:') {
 //    alert('To test this demo properly please use a local server such as XAMPP or WAMP. See README.md for more details.');
 //}
-function test() {
-    alert('xxxxx');
-}
-
 var resizeableImage = function (image_target) {
     // Some variable and settings
     var $container,
@@ -22,30 +18,18 @@ var resizeableImage = function (image_target) {
         currentScale = 1;
 
     init = function () {
-
         // When resizing, we will always use this copy of the original as the base
         orig_src.src = image_target.src;
-
         // Wrap the image with the container and add resize handles
         $(image_target).wrap('<div class="resize-container"></div>');
-        // .before('<span class="resize-handle resize-handle-nw"></span>')
-        // .before('<span class="resize-handle resize-handle-ne"></span>')
-        // .after('<span class="resize-handle resize-handle-se"></span>')
-        // .after('<span class="resize-handle resize-handle-sw"></span>');
-
         $overlay.html('<div class="overlay-inner"></div>');
-        $('.overlay-inner')
-        .before('<span class="resize-handle resize-handle-nw"></span>')
-        .before('<span class="resize-handle resize-handle-ne"></span>')
-        .after('<span class="resize-handle resize-handle-se"></span>')
-        .after('<span class="resize-handle resize-handle-sw"></span>');
-
         // Assign the container to a variable
         $container = $(image_target).parent('.resize-container');
 
         // Add events
         $container.on('mousedown touchstart', 'img', startMoving);
-        //$overlay.on('mousedown touchstart', '.resize-handle', startResize);
+        $('#freesplacement').on('change', freePlacement);
+
         $('#submitCrop').on('click', crop);
         $('#reset').on('click', function () {
             reset();
@@ -59,6 +43,21 @@ var resizeableImage = function (image_target) {
             'left': 0,
             'top': 0
         });
+    };
+    freePlacement = function () {
+        if ($(this).is(":checked")) {
+            $('.overlay-inner')
+            .before('<span class="resize-handle resize-handle-nw"></span>')
+            .before('<span class="resize-handle resize-handle-ne"></span>')
+            .after('<span class="resize-handle resize-handle-se"></span>')
+            .after('<span class="resize-handle resize-handle-sw"></span>');
+            $overlay.removeClass('pointer-events-none');
+            $overlay.on('mousedown touchstart', '.resize-handle', freePlaceResize);
+        }
+        else {
+            $overlay.html('<div class="overlay-inner"></div>');
+            $overlay.addClass('pointer-events-none');
+        }
     };
     initSlide = function () {
         // Get croping box size.
@@ -74,7 +73,7 @@ var resizeableImage = function (image_target) {
             max: 200,
             step: 1,
             slide: function (event, ui) {
-                if (ui.value >= Math.ceil(min_width) || ui.value >= Math.ceil(min_height)) {
+                if (ui.value >= Math.ceil(min_width) && ui.value >= Math.ceil(min_height)) {
                     zoom(ui.value);
                     $("#slider_value").val(ui.value + '%');
                 } else {
@@ -97,7 +96,23 @@ var resizeableImage = function (image_target) {
         $(document).on('mousemove touchmove', resizing);
         $(document).on('mouseup touchend', endResize);
     };
+    freePlaceResize = function (e) {
+          transparentOverlay(0.0);
+        e.preventDefault();
+        e.stopPropagation();
+        cropboxEventState(e);
+        $(document).on('mousemove touchmove', resizingCropbox);
+        $(document).on('mouseup touchend', endResizeCropbox);
+    };
+    endResizeCropbox = function (e) {
+        reset();
+        e.preventDefault();
+        $(document).off('mouseup touchend', endResizeCropbox);
+        $(document).off('mousemove touchmove', resizingCropbox);
 
+        //console.log(  event_state.cropbox_width);
+        transparentOverlay(0.3);
+    };
     endResize = function (e) {
         e.preventDefault();
         $(document).off('mouseup touchend', endResize);
@@ -125,7 +140,95 @@ var resizeableImage = function (image_target) {
         }
         event_state.evnt = e;
     };
+    cropboxEventState = function (e) {
+        event_state.cropbox_width = $overlay.width();
+        event_state.cropbox_height = $overlay.height();
+        event_state.cropbox_left = $overlay.offset().left;
+        event_state.cropbox_top = $overlay.offset().top;
+        event_state.mouse_x = (e.clientX || e.pageX || e.originalEvent.touches[0].clientX) + $(window).scrollLeft();
+        event_state.mouse_y = (e.clientY || e.pageY || e.originalEvent.touches[0].clientY) + $(window).scrollTop();
 
+        // This is a fix for mobile safari
+        // For some reason it does not allow a direct copy of the touches property
+        if (typeof e.originalEvent.touches !== 'undefined') {
+            event_state.touches = [];
+            $.each(e.originalEvent.touches, function (i, ob) {
+                event_state.touches[i] = {};
+                event_state.touches[i].clientX = 0 + ob.clientX;
+                event_state.touches[i].clientY = 0 + ob.clientY;
+            });
+        }
+        event_state.evnt = e;
+    }
+    resizingCropbox = function (e) {
+        var mouse = {}, width, height, left, top, offset = $container.offset();
+        mouse.x = (e.clientX || e.pageX || e.originalEvent.touches[0].clientX) + $(window).scrollLeft();
+        mouse.y = (e.clientY || e.pageY || e.originalEvent.touches[0].clientY) + $(window).scrollTop();
+
+        // Position image differently depending on the corner dragged and constraints
+        if ($(event_state.evnt.target).hasClass('resize-handle-se')) {
+            width = mouse.x - event_state.cropbox_left;
+            height = mouse.y - event_state.cropbox_top;
+            left = event_state.cropbox_left;
+            top = event_state.cropbox_top;
+        } else if ($(event_state.evnt.target).hasClass('resize-handle-sw')) {
+            width = event_state.cropbox_width - (mouse.x - event_state.cropbox_left);
+            height = mouse.y - event_state.cropbox_top;
+            left = mouse.x;
+            top = event_state.cropbox_top;
+        } else if ($(event_state.evnt.target).hasClass('resize-handle-nw')) {
+            width = event_state.cropbox_width - (mouse.x - event_state.cropbox_left);
+            height = event_state.cropbox_height - (mouse.y - event_state.cropbox_top);
+            left = mouse.x;
+            top = mouse.y;
+            if (constrain || e.shiftKey) {
+                top = mouse.y - ((width / orig_src.width * orig_src.height) - height);
+            }
+        } else if ($(event_state.evnt.target).hasClass('resize-handle-ne')) {
+            width = mouse.x - event_state.container_left;
+            height = event_state.container_height - (mouse.y - event_state.container_top);
+            left = event_state.container_left;
+            top = mouse.y;
+            if (constrain || e.shiftKey) {
+                top = mouse.y - ((width / orig_src.width * orig_src.height) - height);
+            }
+        }
+
+event_state.last_width=width;
+event_state.last_height=height;
+        // // Optionally maintain aspect ratio
+        // if (constrain || e.shiftKey) {
+        //     height = width / orig_src.width * orig_src.height;
+        // }
+        //
+        // if (width > min_width && height > min_height && width < max_width && height < max_height) {
+        //     // To improve performance you might limit how often resizeImage() is called
+        //     resizeImage(400, 400);
+        //     // Without this Firefox will not re-calculate the the image dimensions until drag end
+        //     $container.offset({ 'left': left, 'top': top });
+        // }
+      //  $overlay.offset({ 'left': left, 'top': top });
+        $overlay.css({ 'width': width, 'height': height });
+
+
+
+        // console.log('left:'+left+', top:'+top);
+        // console.log('width:'+width+', height:'+height);
+        // var inner= $('<style>.overlay-inner::after,.overlay-inner::before{height:' + height + 'px;}</style>');
+        //   $('head').append(inner);
+    }
+    transparentOverlay = function (opacity) {
+        //    var _s=$('<style>.overlay::before,.overlay::after,.overlay-inner::after,.overlay-inner::before{height:'+height+'px;}</style>');
+        var _s = $('<style>.overlay::before,.overlay::after,.overlay-inner::after,.overlay-inner::before{opacity:' + opacity + ';}.overlay-inner::after,.overlay-inner::before{height:' + event_state.last_height + 'px;}</style>');
+        // re-add style to header
+        var styles = $('head>style');
+        for (var i = styles.length; i--;) {
+            var style = styles[i];
+            style.parentNode.removeChild(style);
+        }
+        $('head').append(_s);
+        //$overlay.data('css',_s);
+    };
     resizing = function (e) {
         var mouse = {}, width, height, left, top, offset = $container.offset();
         mouse.x = (e.clientX || e.pageX || e.originalEvent.touches[0].clientX) + $(window).scrollLeft();
@@ -171,6 +274,7 @@ var resizeableImage = function (image_target) {
             // Without this Firefox will not re-calculate the the image dimensions until drag end
             $container.offset({ 'left': left, 'top': top });
         }
+        //  $('.overlay-inner').offset({ 'left': left, 'top': top });
     }
     reset = function () {
         initSlide();
