@@ -55,12 +55,13 @@ var resizeableImage = function (image_target) {
             $overlay.addClass('free-place');
             $overlay.removeClass('pointer-events-none');
             $overlay.on('mousedown touchstart', '.resize-handle', freePlaceResize);
+            $overlay.on('mousedown touchstart', startMovingCroppingBox);
         }
         else {
             $overlay.removeClass('free-place');
             $overlay.html('<div class="overlay-inner"></div>');
             $overlay.addClass('pointer-events-none');
-              $('.warning').html('');
+            $('.warning').html('');
         }
     };
     initSlide = function () {
@@ -327,14 +328,25 @@ var resizeableImage = function (image_target) {
         resize_canvas.getContext('2d').drawImage(orig_src, 0, 0, width, height);
         $(image_target).attr('src', resize_canvas.toDataURL("image/png"));
     };
+    startMovingCroppingBox = function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        cropboxEventState(e);
+        $(document).on('mousemove touchmove', movingCroppingBox);
+        $(document).on('mouseup touchend', endMovingCroppingBox);
+    };
+    endMovingCroppingBox = function (e) {
+        e.preventDefault();
+        $(document).off('mouseup touchend', endMovingCroppingBox);
+        $(document).off('mousemove touchmove', movingCroppingBox);
+    };
     startMoving = function (e) {
         e.preventDefault();
         e.stopPropagation();
-        saveEventState(e);
+        saveEventState (e);
         $(document).on('mousemove touchmove', moving);
         $(document).on('mouseup touchend', endMoving);
     };
-
     endMoving = function (e) {
         e.preventDefault();
         $(document).off('mouseup touchend', endMoving);
@@ -396,7 +408,65 @@ var resizeableImage = function (image_target) {
             console.log(err.message);
         }
     };
+    movingCroppingBox = function (e) {
+        try {
+            var mouse = {}, touches;
+            e.preventDefault();
+            e.stopPropagation();
 
+            touches = e.originalEvent.touches;
+
+            mouse.x = (e.clientX || e.pageX || touches[0].clientX) + $(window).scrollLeft();
+            mouse.y = (e.clientY || e.pageY || touches[0].clientY) + $(window).scrollTop();
+
+            var _left = mouse.x - (event_state.mouse_x - event_state.cropbox_left);
+            var _top = mouse.y - (event_state.mouse_y - event_state.cropbox_top);
+
+            //Not allow to drag out of the box.
+            if (_left <= 0) return false;
+            else $overlay.offset({
+                'left': _left
+            });
+            if (_top <= 0) return false;
+            else $overlay.offset({
+                'top': _top
+            });
+            // Allow to drag out of the box.
+            // console.log('left:'+_left+' , top:'+_top);
+            // if (_left > 0 && _top > 0) {
+            //
+            //     $overlay.offset({
+            //         'left': _left,
+            //         'top': _top
+            //     });
+            // }
+            // // Watch for pinch zoom gesture while moving
+            // if (event_state.touches && event_state.touches.length > 1 && touches.length > 1) {
+            //     var width = event_state.cropbox_width, height = event_state.cropbox_height;
+            //     var a = event_state.touches[0].clientX - event_state.touches[1].clientX;
+            //     a = a * a;
+            //     var b = event_state.touches[0].clientY - event_state.touches[1].clientY;
+            //     b = b * b;
+            //     var dist1 = Math.sqrt(a + b);
+            //
+            //     a = e.originalEvent.touches[0].clientX - touches[1].clientX;
+            //     a = a * a;
+            //     b = e.originalEvent.touches[0].clientY - touches[1].clientY;
+            //     b = b * b;
+            //     var dist2 = Math.sqrt(a + b);
+            //
+            //     var ratio = dist2 / dist1;
+            //
+            //     width = width * ratio;
+            //     height = height * ratio;
+            //     // To improve performance you might limit how often resizeImage() is called
+            //     //resizeImage(width, height);
+            // }
+        }
+        catch (err) {
+            console.log(err.message);
+        }
+    };
     crop = function () {
         //Find the part of the image that is inside the crop box
         var crop_canvas,
