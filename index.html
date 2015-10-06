@@ -30,31 +30,35 @@
                     <div class="overlay-inner">
                     </div>
                 </div>
-                <img class="resize-image" src="img/landhd.jpg" alt="image for resizing">
+                <img class="resize-image" src="img/auckland scene.jpg" alt="image for resizing">
             </div>
             <div class="control-panal">
                 <div>
-                    <input type="button" value="Fit Width" id="fitWidth" data-width="300" />
-                    <input type="button" value="Fit Height" id="fitHeight" data-height="200" />
-                    <label>
+                    <input type="button" value="Fit Width" id="fitWidth" class="bt" data-width="300" />
+                    <input type="button" value="Fit Height" id="fitHeight" class="bt" data-height="200" />
+                    <input id="reset" type="button" class="bt" value="Reset" />
+                    <hr />
+                    <div id="slide_panel">
+                        <div id="slider"></div>
+
+                        <span style="margin-bottom:70px;" class="slide_desc">Make bigger</span>
+                        <span style="margin-bottom:70px;" class="slide_desc">Resize photo</span>
+                        <span style="" class="slide_desc">Make bigger</span>
+                        <!-- <input type="text" id="slider_value" style="border:0; color:#f6931f; font-weight:bold;" /> -->
+                    </div>
+                    <div class="clearfix"></div>
+                    <br />
+                    <label style="margin-top:10px;">
                         <input type="checkbox" id="freesplacement" /> Free Placement
                     </label>
-
-                    <input id="reset" type="button" value="Reset" />
                     <hr />
-                    <div>
-                        <!--<button id="ZoomIn">Zoom in</button>
-                        <button id="ZoomOut">Zoom Out</button>-->
-                        <div id="slider"></div>
-                        <input type="text" id="slider_value" style="border:0; color:#f6931f; font-weight:bold;" />
-                    </div>
-                    <button id="clockwise">Rotate right</button>
-                    <button id="counterclockwise">Rotate left</button>
+                    <button id="clockwise" class="bt">Rotate right</button>
+                    <button id="counterclockwise" class="bt">Rotate left</button>
 
                     <!--<span><input type="checkbox" /> Free space</span>-->
                     <hr />
-                    <input type="button" value="Submit" id="submitCrop" />
-                    <input type="button" value="Cancle" />
+                    <input type="button" value="Submit" id="submitCrop" class="bt" />
+                    <input type="button" value="Cancle" class="bt" />
                 </div>
             </div>
         </div>

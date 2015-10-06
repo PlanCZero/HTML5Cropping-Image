@@ -93,7 +93,7 @@ var resizeableImage = function (image_target) {
             slide: function (event, ui) {
                 if (ui.value >= Math.ceil(min_width) && ui.value >= Math.ceil(min_height)) {
                     zoom(ui.value);
-                    $("#slider_value").val(ui.value + '%');
+                    //  $("#slider_value").val(ui.value + '%');
                 } else {
                     return false;
                 }
@@ -102,18 +102,22 @@ var resizeableImage = function (image_target) {
                 //console.log('start slide');
             },
             stop: function (event, ui) {
-                resizeImage(resize_canvas.width, resize_canvas.height);
+                if (angleInDegrees != 0) {
+                    reDrawRotate();
+                } else {
+                    resizeImage(resize_canvas.width, resize_canvas.height);
+                }
             }
         });
-        $("#slider_value").val($("#slider").slider("value") + '%');
+        //$("#slider_value").val($("#slider").slider("value") + '%');
     };
-    startResize = function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        saveEventState(e);
-        $(document).on('mousemove touchmove', resizing);
-        $(document).on('mouseup touchend', endResize);
-    };
+    // startResize = function (e) {
+    //     e.preventDefault();
+    //     e.stopPropagation();
+    //     saveEventState(e);
+    //     $(document).on('mousemove touchmove', resizing);
+    //     $(document).on('mouseup touchend', endResize);
+    // };
     freePlaceResize = function (e) {
         transparentOverlay(0.0);
         e.preventDefault();
@@ -123,19 +127,16 @@ var resizeableImage = function (image_target) {
         $(document).on('mouseup touchend', endResizeCropbox);
     };
     endResizeCropbox = function (e) {
-        //  reset();
         e.preventDefault();
         $(document).off('mouseup touchend', endResizeCropbox);
         $(document).off('mousemove touchmove', resizingCropbox);
-
-        //console.log(  event_state.cropbox_width);
         transparentOverlay(0.3);
     };
-    endResize = function (e) {
-        e.preventDefault();
-        $(document).off('mouseup touchend', endResize);
-        $(document).off('mousemove touchmove', resizing);
-    };
+    // endResize = function (e) {
+    //     e.preventDefault();
+    //     $(document).off('mouseup touchend', endResize);
+    //     $(document).off('mousemove touchmove', resizing);
+    // };
 
     saveEventState = function (e) {
         // Save the initial event details and container state
@@ -222,7 +223,6 @@ var resizeableImage = function (image_target) {
         });
     }
     transparentOverlay = function (opacity) {
-        //    var _s=$('<style>.overlay::before,.overlay::after,.overlay-inner::after,.overlay-inner::before{height:'+height+'px;}</style>');
         var _s = $('<style>.overlay::before,.overlay::after,.overlay-inner::after,.overlay-inner::before{opacity:' + opacity + ';}.overlay-inner::after,.overlay-inner::before{height:' + event_state.last_height + 'px;}</style>');
         // re-add style to header
         var styles = $('head>style');
@@ -245,64 +245,64 @@ var resizeableImage = function (image_target) {
         $overlay.html('<div class="overlay-inner"></div>');
         $overlay.addClass('pointer-events-none');
     };
-    resizing = function (e) {
-        var mouse = {},
-          width, height, left, top, offset = $container.offset();
-        mouse.x = (e.clientX || e.pageX || e.originalEvent.touches[0].clientX) + $(window).scrollLeft();
-        mouse.y = (e.clientY || e.pageY || e.originalEvent.touches[0].clientY) + $(window).scrollTop();
-
-        // Position image differently depending on the corner dragged and constraints
-        if ($(event_state.evnt.target).hasClass('resize-handle-se')) {
-            width = mouse.x - event_state.container_left;
-            height = mouse.y - event_state.container_top;
-            left = event_state.container_left;
-            top = event_state.container_top;
-        } else if ($(event_state.evnt.target).hasClass('resize-handle-sw')) {
-            width = event_state.container_width - (mouse.x - event_state.container_left);
-            height = mouse.y - event_state.container_top;
-            left = mouse.x;
-            top = event_state.container_top;
-        } else if ($(event_state.evnt.target).hasClass('resize-handle-nw')) {
-            width = event_state.container_width - (mouse.x - event_state.container_left);
-            height = event_state.container_height - (mouse.y - event_state.container_top);
-            left = mouse.x;
-            top = mouse.y;
-            if (constrain || e.shiftKey) {
-                top = mouse.y - ((width / orig_src.width * orig_src.height) - height);
-            }
-        } else if ($(event_state.evnt.target).hasClass('resize-handle-ne')) {
-            width = mouse.x - event_state.container_left;
-            height = event_state.container_height - (mouse.y - event_state.container_top);
-            left = event_state.container_left;
-            top = mouse.y;
-            if (constrain || e.shiftKey) {
-                top = mouse.y - ((width / orig_src.width * orig_src.height) - height);
-            }
-
-        }
-
-        // Optionally maintain aspect ratio
-        if (constrain || e.shiftKey) {
-            height = width / orig_src.width * orig_src.height;
-        }
-
-        if (width > min_width && height > min_height && width < max_width && height < max_height) {
-            // To improve performance you might limit how often resizeImage() is called
-            resizeImage(400, 400);
-            // Without this Firefox will not re-calculate the the image dimensions until drag end
-            $container.offset({
-                'left': left,
-                'top': top
-            });
-        }
-        //  $('.overlay-inner').offset({ 'left': left, 'top': top });
-    }
+    // resizing = function (e) {
+    //     var mouse = {},
+    //       width, height, left, top, offset = $container.offset();
+    //     mouse.x = (e.clientX || e.pageX || e.originalEvent.touches[0].clientX) + $(window).scrollLeft();
+    //     mouse.y = (e.clientY || e.pageY || e.originalEvent.touches[0].clientY) + $(window).scrollTop();
+    //
+    //     // Position image differently depending on the corner dragged and constraints
+    //     if ($(event_state.evnt.target).hasClass('resize-handle-se')) {
+    //         width = mouse.x - event_state.container_left;
+    //         height = mouse.y - event_state.container_top;
+    //         left = event_state.container_left;
+    //         top = event_state.container_top;
+    //     } else if ($(event_state.evnt.target).hasClass('resize-handle-sw')) {
+    //         width = event_state.container_width - (mouse.x - event_state.container_left);
+    //         height = mouse.y - event_state.container_top;
+    //         left = mouse.x;
+    //         top = event_state.container_top;
+    //     } else if ($(event_state.evnt.target).hasClass('resize-handle-nw')) {
+    //         width = event_state.container_width - (mouse.x - event_state.container_left);
+    //         height = event_state.container_height - (mouse.y - event_state.container_top);
+    //         left = mouse.x;
+    //         top = mouse.y;
+    //         if (constrain || e.shiftKey) {
+    //             top = mouse.y - ((width / orig_src.width * orig_src.height) - height);
+    //         }
+    //     } else if ($(event_state.evnt.target).hasClass('resize-handle-ne')) {
+    //         width = mouse.x - event_state.container_left;
+    //         height = event_state.container_height - (mouse.y - event_state.container_top);
+    //         left = event_state.container_left;
+    //         top = mouse.y;
+    //         if (constrain || e.shiftKey) {
+    //             top = mouse.y - ((width / orig_src.width * orig_src.height) - height);
+    //         }
+    //
+    //     }
+    //
+    //     // Optionally maintain aspect ratio
+    //     if (constrain || e.shiftKey) {
+    //         height = width / orig_src.width * orig_src.height;
+    //     }
+    //
+    //     if (width > min_width && height > min_height && width < max_width && height < max_height) {
+    //         // To improve performance you might limit how often resizeImage() is called
+    //         resizeImage(400, 400);
+    //         // Without this Firefox will not re-calculate the the image dimensions until drag end
+    //         $container.offset({
+    //             'left': left,
+    //             'top': top
+    //         });
+    //     }
+    // }
     reset = function () {
         initSlide();
         currentScale = 1;
         $(image_target).removeAttr('style');
         resizeImage(orig_src.width, orig_src.height);
         resetCroppingBox();
+        $('.warning').html('');
     };
     zoom = function (scale) {
         var w = orig_src.width,
@@ -315,27 +315,59 @@ var resizeableImage = function (image_target) {
           box_height = $('.overlay').height();
 
         if (currentScale > 1) {
-            $(image_target).css({
-                'width': w + _w + 'px',
-                'height': h + _h + 'px'
-            });
+            if (angleInDegrees == 90 || angleInDegrees == 270 || angleInDegrees == -90 || angleInDegrees == -270) {
+                $(image_target).css({
+                    'width': h + _h + 'px',
+                    'height': w + _w + 'px'
+                });
+                resize_canvas.width = (h + _h);
+                resize_canvas.height = (w + _w);
+            } else {
+                $(image_target).css({
+                    'width': w + _w + 'px',
+                    'height': h + _h + 'px'
+                });
+                resize_canvas.width = (w + _w);
+                resize_canvas.height = (h + _h);
+            }
+
             resize_canvas.width = (w + _w);
             resize_canvas.height = (h + _h);
         } else if (currentScale < 1) {
-            $(image_target).css({
-                'width': w - _w + 'px',
-                'height': h - _h + 'px'
-            });
-            resize_canvas.width = (w - _w);
-            resize_canvas.height = (h - _h);
+            if (angleInDegrees == 90 || angleInDegrees == 270 || angleInDegrees == -90 || angleInDegrees == -270) {
+                $(image_target).css({
+                    'width': h - _h + 'px',
+                    'height': w - _w + 'px'
+                });
+                resize_canvas.width = (h - _h);
+                resize_canvas.height = (w - _w);
+            } else {
+                $(image_target).css({
+                    'width': w - _w + 'px',
+                    'height': h - _h + 'px'
+                });
+                resize_canvas.width = (w - _w);
+                resize_canvas.height = (h - _h);
+            }
+
         } else {
-            $(image_target).css({
-                'width': w + 'px',
-                'height': h + 'px'
-            });
-            resize_canvas.width = (w);
-            resize_canvas.height = (h);
+            if (angleInDegrees == 90 || angleInDegrees == 270 || angleInDegrees == -90 || angleInDegrees == -270) {
+                $(image_target).css({
+                    'width': h + 'px',
+                    'height': w + 'px'
+                });
+                resize_canvas.width = h;
+                resize_canvas.height = w;
+            } else {
+                $(image_target).css({
+                    'width': w + 'px',
+                    'height': h + 'px'
+                });
+                resize_canvas.width = (w);
+                resize_canvas.height = (h);
+            }
         }
+        console.log('w:'+resize_canvas.width+' ,h:'+resize_canvas.height);
     };
     fitwidth = function (e) {
         initSlide();
@@ -350,7 +382,14 @@ var resizeableImage = function (image_target) {
             'left': left,
             'top': top
         });
+        if (angleInDegrees != 0) {
+           resize_canvas.width=box_width+5;
+           resize_canvas.height=box_height+5;
+            reDrawRotate();
+          }
+          else{
         resizeImage((box_width + 5), box_height);
+      }
     }
     fitheight = function (e) {
         initSlide();
@@ -365,7 +404,14 @@ var resizeableImage = function (image_target) {
             'left': left,
             'top': top
         });
-        resizeImage(box_width, (box_height + 5));
+        if (angleInDegrees != 0) {
+           resize_canvas.width=box_width;
+           resize_canvas.height=box_height+5;
+            reDrawRotate();
+          }
+          else{
+          resizeImage(box_width, (box_height + 5));
+      }
     }
     resizeImage = function (width, height) {
         resize_canvas.width = width;
@@ -478,56 +524,30 @@ var resizeableImage = function (image_target) {
             else $overlay.offset({
                 'top': _top
             });
-            // Allow to drag out of the box.
-            // console.log('left:'+_left+' , top:'+_top);
-            // if (_left > 0 && _top > 0) {
-            //
-            //     $overlay.offset({
-            //         'left': _left,
-            //         'top': _top
-            //     });
-            // }
-            // // Watch for pinch zoom gesture while moving
-            // if (event_state.touches && event_state.touches.length > 1 && touches.length > 1) {
-            //     var width = event_state.cropbox_width, height = event_state.cropbox_height;
-            //     var a = event_state.touches[0].clientX - event_state.touches[1].clientX;
-            //     a = a * a;
-            //     var b = event_state.touches[0].clientY - event_state.touches[1].clientY;
-            //     b = b * b;
-            //     var dist1 = Math.sqrt(a + b);
-            //
-            //     a = e.originalEvent.touches[0].clientX - touches[1].clientX;
-            //     a = a * a;
-            //     b = e.originalEvent.touches[0].clientY - touches[1].clientY;
-            //     b = b * b;
-            //     var dist2 = Math.sqrt(a + b);
-            //
-            //     var ratio = dist2 / dist1;
-            //
-            //     width = width * ratio;
-            //     height = height * ratio;
-            //     // To improve performance you might limit how often resizeImage() is called
-            //     //resizeImage(width, height);
-            // }
         } catch (err) {
             console.log(err.message);
         }
     };
     crop = function () {
-        //Find the part of the image that is inside the crop box
-        var crop_canvas,
-          left = $('.overlay').offset().left - $container.offset().left,
-          top = $('.overlay').offset().top - $container.offset().top,
-          width = $('.overlay').width(),
-          height = $('.overlay').height();
+        try {
+            //Find the part of the image that is inside the crop box
+            var crop_canvas,
+              left = $('.overlay').offset().left - $container.offset().left,
+              top = $('.overlay').offset().top - $container.offset().top,
+              width = $('.overlay').width(),
+              height = $('.overlay').height();
 
-        crop_canvas = document.createElement('canvas');
-        crop_canvas.width = width;
-        crop_canvas.height = height;
+            crop_canvas = document.createElement('canvas');
+            crop_canvas.width = width;
+            crop_canvas.height = height;
 
-        crop_canvas.getContext('2d').drawImage(image_target, left, top, width, height, 0, 0, width, height);
-        window.open(crop_canvas.toDataURL("image/png"));
-    }
+            crop_canvas.getContext('2d').drawImage(image_target, left, top, width, height, 0, 0, width, height);
+            window.open(crop_canvas.toDataURL("image/png"));
+        }
+        catch (err) {
+            alert(err.message);
+        }
+    };
     drawRotated = function () {
         var ctx = resize_canvas.getContext('2d');
         ctx.clearRect(0, 0, resize_canvas.width, resize_canvas.height);
@@ -553,7 +573,25 @@ var resizeableImage = function (image_target) {
 
         if (angleInDegrees == 360 || angleInDegrees == -360)
             angleInDegrees = 0;
-    }
+    };
+    reDrawRotate=function(){
+      var ctx = resize_canvas.getContext('2d');
+      ctx.clearRect(0, 0, resize_canvas.width, resize_canvas.height);
+      ctx.save();
+      ctx.translate(resize_canvas.width / 2, resize_canvas.height / 2);
+      ctx.rotate(angleInDegrees * Math.PI / 180);
+
+      if (angleInDegrees == 90 || angleInDegrees == 270 || angleInDegrees == -90 || angleInDegrees == -270) {
+          ctx.drawImage(orig_src, -resize_canvas.height / 2, -resize_canvas.width / 2, resize_canvas.height, resize_canvas.width);
+      } else {
+          ctx.drawImage(orig_src, -resize_canvas.width / 2, -resize_canvas.height / 2, resize_canvas.width, resize_canvas.height);
+      }
+      ctx.restore();
+      $(image_target).attr('src', resize_canvas.toDataURL("image/png"));
+      if (angleInDegrees == 360 || angleInDegrees == -360)
+          angleInDegrees = 0;
+    };
+
     init();
 };
 

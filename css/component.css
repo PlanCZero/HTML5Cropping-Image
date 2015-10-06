@@ -80,7 +80,7 @@
     height: 1000px;
     /*border-left: dashed 2px rgba(222,60,80,.9);
 	border-right: dashed 2px rgba(222,60,80,.9);*/
-    background-color: #000;
+    background-color: #5875ac;
     opacity: 0.3;
 }
 
@@ -105,7 +105,7 @@
     height: 200px;
     /*border-top: dashed 2px rgba(222,60,80,.9);
 	border-bottom: dashed 2px rgba(222,60,80,.9);*/
-    background-color: #000;
+    background-color: #5875ac;
     opacity: 0.3;
 }
 
@@ -121,6 +121,37 @@
     margin-top: 0;
 }
 
+
+.bt{
+  width: 100%;
+  padding:3px;
+margin:3px;
+  /* Safari 4-5, Chrome 1-9 */
+background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#c8d6ea), to(#859bc3));
+
+/* Safari 5.1, Chrome 10+ */
+background: -webkit-linear-gradient(top, #c8d6ea, #859bc3);
+
+/* Firefox 3.6+ */
+background: -moz-linear-gradient(top, #c8d6ea, #859bc3);
+
+/* IE 10 */
+background: -ms-linear-gradient(top, #c8d6ea, #859bc3);
+
+/* Opera 11.10+ */
+background: -o-linear-gradient(top, #c8d6ea, #859bc3);
+border:none;
+}
+.ui-slider-vertical{
+  width: 3px!important;
+}
+
+#slide_panel
+{
+  position:relative;
+  margin-top:15px;
+  margin-bottom: 15px;
+}
 .btn-crop {
     position: absolute;
     vertical-align: bottom;
@@ -140,8 +171,22 @@
     }
 
 .ui-slider-vertical {
-    height: 270px !important;
+    height: 180px !important;
+    float:left;
 }
 .warning{
 color:#FF0000;
+}
+.slide_desc{
+width: 80%;
+float:right;
+font-size:12px;
+}
+.ui-state-default,
+.ui-widget-content
+.ui-state-default,
+.ui-widget-header .ui-state-default {
+  background: transparent url("../img/arrow.png") repeat-x scroll 50% 50%!important;
+  border:none!important;
+  left:-5px!important;
 }

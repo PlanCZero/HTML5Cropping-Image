@@ -1,4 +1,4 @@
-@import url(http://fonts.googleapis.com/css?family=Raleway:400,500,700);
+@import url(https://www.google.com/fonts/specimen/Open+Sans:400,500,700);
 
 /*@font-face {
     font-weight: normal;
@@ -26,8 +26,8 @@ body {
     /*background: #88ABC2;*/
     color: #EBF7F8;
     font-weight: 500;
-    font-size: 1em;
-    font-family: 'Raleway', Arial, sans-serif;
+    font-size: 14px;
+    font-family: 'Open Sans', Arial, sans-serif;
 }
 
 a {
@@ -72,7 +72,7 @@ a {
 .control-panal {
     float: right;
     display: block;
-    background-color: #2F7FD0;
+    background-color: #5875ac;
     width: 200px;
     height: 500px;
     padding: 10px;
