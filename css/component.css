@@ -127,19 +127,19 @@
   padding:3px;
 margin:3px;
   /* Safari 4-5, Chrome 1-9 */
-background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#c8d6ea), to(#859bc3));
+background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#b8d3ed), to(#79a7d5));
 
 /* Safari 5.1, Chrome 10+ */
-background: -webkit-linear-gradient(top, #c8d6ea, #859bc3);
+background: -webkit-linear-gradient(top, #b8d3ed, #79a7d5);
 
 /* Firefox 3.6+ */
-background: -moz-linear-gradient(top, #c8d6ea, #859bc3);
+background: -moz-linear-gradient(top, #b8d3ed, #79a7d5);
 
 /* IE 10 */
-background: -ms-linear-gradient(top, #c8d6ea, #859bc3);
+background: -ms-linear-gradient(top, #b8d3ed, #79a7d5);
 
 /* Opera 11.10+ */
-background: -o-linear-gradient(top, #c8d6ea, #859bc3);
+background: -o-linear-gradient(top, #b8d3ed, #79a7d5);
 border:none;
 }
 .ui-slider-vertical{

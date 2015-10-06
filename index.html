@@ -30,7 +30,7 @@
                     <div class="overlay-inner">
                     </div>
                 </div>
-                <img class="resize-image" src="img/auckland scene.jpg" alt="image for resizing">
+                <img class="resize-image" src="img/image.jpg" alt="image for resizing">
             </div>
             <div class="control-panal">
                 <div>
@@ -67,6 +67,11 @@
     <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
 
     <script src="js/component.js"></script>
-
+    <script type="text/javascript">
+        $(function () {
+            // Kick everything off with the target image
+            $.resizeableImage($('.resize-image')).init();
+        });
+    </script>
 </body>
 </html>
