@@ -50,14 +50,32 @@
                 drawRotated();
             });
             initSlide();
-            $container.offset({
-                'left': 0,
-                'top': 0
-            });
-            // set size of canvas
-            resize_canvas.width = orig_src.width;
-            resize_canvas.height = orig_src.height;
+            // $container.offset({
+            //     'left': 0,
+            //     'top': 0
+            // });
 
+            resize_canvas.width = orig_src.width;
+            resize_canvas.height =orig_src.height;
+            // FIND SIZE FIT WITH CROPBOX
+            // Get croping box size.
+            var box_width = $overlay.width(), box_height = $overlay.height();
+            //  slide nubmer is in between 1-200
+            //  Key is find min slide number
+            var min_width = (box_width / orig_src.width) * 100;
+            var min_height = (box_height / orig_src.height) * 100;
+
+            // set size of canvas fit with croping box.
+            zoom(Math.ceil(min_height));
+            resizeImage(resize_canvas.width, resize_canvas.height);
+
+            // set picture offset
+            var left=$overlay.offset().left,top=$overlay.offset().top;
+            $container.offset({
+                'left': left,
+                'top': top
+            });
+          //  $container.find('img').css({'display':'block'});
         };
         freePlacement = function () {
             if ($(this).is(":checked")) {
@@ -390,6 +408,19 @@
                 var _left = mouse.x - (event_state.mouse_x - event_state.container_left);
                 var _top = mouse.y - (event_state.mouse_y - event_state.container_top);
 
+                // FIND CROPBOX OFFSET
+                var c_left=$overlay.offset().left,c_top=$overlay.offset().top;
+
+                // diff
+                var _cLeftPic=  resize_canvas.width-$overlay.width();
+                console.log('pic : '+_left +' cropbox : '+c_left+ ' diff :' + _cLeftPic + ' last_pos : '+(c_left-_cLeftPic));
+
+                //var _r=$overlay.width()+_cLeftPic;
+                if ( _left >= (c_left-_cLeftPic)&&_left<=c_left)
+                $container.offset({
+                    'left': _left
+                });
+               else  return false;
                 // Not allow to drag out of the box.
                 // if (_left <= 0) return false;
                 // else $container.offset({
@@ -400,10 +431,10 @@
                 //     'top': _top
                 // });
                 // Allow to drag out of the box.
-                $container.offset({
-                    'left': _left,
-                    'top': _top
-                });
+                // $container.offset({
+                //     'left': _left,
+                //     'top': _top
+                // });
                 // Watch for pinch zoom gesture while moving
                 if (event_state.touches && event_state.touches.length > 1 && touches.length > 1) {
                     var width = event_state.container_width,
