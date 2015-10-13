@@ -17,7 +17,8 @@
           resize_canvas = document.createElement('canvas'),
           zoomDelta = 0.01,
           currentScale = 1,
-          angleInDegrees = 0;
+          angleInDegrees = 0,
+          isFreePlacement = false;
 
         init = function () {
             // When resizing, we will always use this copy of the original as the base
@@ -49,14 +50,8 @@
                 angleInDegrees -= 90;
                 drawRotated();
             });
-            initSlide();
-            // $container.offset({
-            //     'left': 0,
-            //     'top': 0
-            // });
-
             resize_canvas.width = orig_src.width;
-            resize_canvas.height =orig_src.height;
+            resize_canvas.height = orig_src.height;
             // FIND SIZE FIT WITH CROPBOX
             // Get croping box size.
             var box_width = $overlay.width(), box_height = $overlay.height();
@@ -70,43 +65,41 @@
             resizeImage(resize_canvas.width, resize_canvas.height);
 
             // set picture offset
-            var left=$overlay.offset().left,top=$overlay.offset().top;
+            var left = $overlay.offset().left, top = $overlay.offset().top;
             $container.offset({
                 'left': left,
                 'top': top
             });
-          //  $container.find('img').css({'display':'block'});
+            initSlide(Math.ceil(min_height));
         };
         freePlacement = function () {
             if ($(this).is(":checked")) {
-                $('.overlay-inner')
-                  //  .before('<span class="resize-handle resize-handle-nw"></span>')
-                  //  .before('<span class="resize-handle resize-handle-ne"></span>')
-                  .after('<span class="resize-handle resize-handle-se"></span>');
-                //  .after('<span class="resize-handle resize-handle-sw"></span>');
-                $('.warning').html('UnCheck "Free Placement" to move picture.');
                 $overlay.addClass('free-place');
-                $overlay.removeClass('pointer-events-none');
-                $overlay.on('mousedown touchstart', '.resize-handle', freePlaceResize);
-                $overlay.on('mousedown touchstart', startMovingCroppingBox);
+                isFreePlacement = true;
             } else {
                 $overlay.removeClass('free-place');
                 $overlay.html('<div class="overlay-inner"></div>');
-                $overlay.addClass('pointer-events-none');
                 $('.warning').html('');
+                isFreePlacement = false;
+                resetImagePos();
             }
         };
-        initSlide = function () {
-            // Get croping box size.
+        resetImagePos = function () {
+            // reset offset
+            var _left = $overlay.offset().left, _top = $overlay.offset().top;
+            $container.offset({
+                'left': _left,
+                'top': _top
+            });
+        };
+        initSlide = function (slideNo) {
             var box_width = $('.overlay').width(),
               box_height = $('.overlay').height();
-            //  slide nubmer is in between 1-200
-            //  Key is find min slide number
             var min_width = (box_width / orig_src.width) * 100;
             var min_height = (box_height / orig_src.height) * 100;
             $("#slider").slider({
                 orientation: "vertical",
-                value: 100,
+                value: slideNo,
                 min: 0,
                 max: 200,
                 step: 1,
@@ -126,10 +119,10 @@
                         reDrawRotate();
                     } else {
                         resizeImage(resize_canvas.width, resize_canvas.height);
+                        resetImagePos();
                     }
                 }
             });
-            //$("#slider_value").val($("#slider").slider("value") + '%');
         };
         freePlaceResize = function (e) {
             transparentOverlay(0.0);
@@ -192,35 +185,10 @@
             mouse.x = (e.clientX || e.pageX || e.originalEvent.touches[0].clientX) + $(window).scrollLeft();
             mouse.y = (e.clientY || e.pageY || e.originalEvent.touches[0].clientY) + $(window).scrollTop();
 
-            // Position image differently depending on the corner dragged and constraints
-            // if ($(event_state.evnt.target).hasClass('resize-handle-se')) {
             width = mouse.x - event_state.cropbox_left;
             height = mouse.y - event_state.cropbox_top;
             left = event_state.cropbox_left;
             top = event_state.cropbox_top;
-            // } else if ($(event_state.evnt.target).hasClass('resize-handle-sw')) {
-            //     width = event_state.cropbox_width - (mouse.x - event_state.cropbox_left);
-            //     height = mouse.y - event_state.cropbox_top;
-            //     left = mouse.x;
-            //     top =mouse.y// event_state.cropbox_top;
-            // } else if ($(event_state.evnt.target).hasClass('resize-handle-nw')) {
-            //     width = event_state.cropbox_width - (mouse.x - event_state.cropbox_left);
-            //     height = event_state.cropbox_height - (mouse.y - event_state.cropbox_top);
-            //     left = mouse.x;
-            //     top = mouse.y;
-            //     // if (constrain || e.shiftKey) {
-            //     //     top = mouse.y - ((width / orig_src.width * orig_src.height) - height);
-            //     // }
-            // } else if ($(event_state.evnt.target).hasClass('resize-handle-ne')) {
-            //     width = mouse.x - event_state.croptbox_left;
-            //     height = event_state.cropbox_height - (mouse.y - event_state.cropbox_top);
-            //     left =mouse.x;// event_state.cropbox_left;
-            //     top = mouse.y;
-            //     // if (constrain || e.shiftKey) {
-            //     //     top = mouse.y - ((width / orig_src.width * orig_src.height) - height);
-            //     // }
-            //         console.log('top:'+top+' left:'+left);
-            // }
 
             event_state.last_width = width;
             event_state.last_height = height;
@@ -253,7 +221,7 @@
             $overlay.addClass('pointer-events-none');
         };
         reset = function () {
-            initSlide();
+            initSlide(100);
             currentScale = 1;
             $(image_target).removeAttr('style');
             resizeImage(orig_src.width, orig_src.height);
@@ -320,7 +288,7 @@
             }
         };
         fitwidth = function (e) {
-            initSlide();
+            initSlide(100);
             var box_width = $('.overlay').width(),
               box_height = $('.overlay').height(),
               left = $('.overlay').offset().left,
@@ -342,7 +310,7 @@
             }
         }
         fitheight = function (e) {
-            initSlide();
+            initSlide(100);
             var box_width = $('.overlay').width(),
               box_height = $('.overlay').height(),
               left = $('.overlay').offset().left,
@@ -408,34 +376,30 @@
                 var _left = mouse.x - (event_state.mouse_x - event_state.container_left);
                 var _top = mouse.y - (event_state.mouse_y - event_state.container_top);
 
-                // FIND CROPBOX OFFSET
-                var c_left=$overlay.offset().left,c_top=$overlay.offset().top;
+                if (isFreePlacement) {
+                    $container.offset({
+                        'left': _left,
+                        'top': _top
+                    });
+                } else {
+                    // FIND CROPBOX OFFSET
+                    var c_left = $overlay.offset().left, c_top = $overlay.offset().top;
 
-                // diff
-                var _cLeftPic=  resize_canvas.width-$overlay.width();
-                console.log('pic : '+_left +' cropbox : '+c_left+ ' diff :' + _cLeftPic + ' last_pos : '+(c_left-_cLeftPic));
+                    // diff
+                    var _cLeftPic = resize_canvas.width - $overlay.width();
+                    var _cTopPic = resize_canvas.height - $overlay.height();
+                    if (_left >= ((c_left - _cLeftPic) + 3) && _left <= c_left)
+                        $container.offset({
+                            'left': _left
+                        });
+                    else return false;
+                    if (_top >= ((c_top - _cTopPic) + 3) && _top <= c_top) {
+                        $container.offset({
+                            'top': _top
+                        });
+                    } else return false;
+                }
 
-                //var _r=$overlay.width()+_cLeftPic;
-                if ( _left >= (c_left-_cLeftPic)&&_left<=c_left)
-                $container.offset({
-                    'left': _left
-                });
-               else  return false;
-                // Not allow to drag out of the box.
-                // if (_left <= 0) return false;
-                // else $container.offset({
-                //     'left': _left
-                // });
-                // if (_top <= 0) return false;
-                // else $container.offset({
-                //     'top': _top
-                // });
-                // Allow to drag out of the box.
-                // $container.offset({
-                //     'left': _left,
-                //     'top': _top
-                // });
-                // Watch for pinch zoom gesture while moving
                 if (event_state.touches && event_state.touches.length > 1 && touches.length > 1) {
                     var width = event_state.container_width,
                       height = event_state.container_height;
@@ -455,7 +419,6 @@
 
                     width = width * ratio;
                     height = height * ratio;
-                    // To improve performance you might limit how often resizeImage() is called
                     resizeImage(width, height);
                 }
             } catch (err) {
