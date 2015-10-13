@@ -44,11 +44,13 @@
             $("#clockwise").click(function () {
                 angleInDegrees += 90;
                 drawRotated();
+                resetImagePos();
             });
 
             $("#counterclockwise").click(function () {
                 angleInDegrees -= 90;
                 drawRotated();
+                resetImagePos();
             });
             resize_canvas.width = orig_src.width;
             resize_canvas.height = orig_src.height;
@@ -119,8 +121,8 @@
                         reDrawRotate();
                     } else {
                         resizeImage(resize_canvas.width, resize_canvas.height);
-                        resetImagePos();
                     }
+                    resetImagePos();
                 }
             });
         };
@@ -392,12 +394,19 @@
                         $container.offset({
                             'left': _left
                         });
-                    else return false;
+                    // else {
+                    //     return false;
+                    // }
+                    //  console.log('pic_height : '+ resize_canvas.height+' , box_height : '+c_top);
                     if (_top >= ((c_top - _cTopPic) + 3) && _top <= c_top) {
                         $container.offset({
                             'top': _top
                         });
-                    } else return false;
+                    }
+                    // else {
+                    //
+                    //     return false;
+                    // }
                 }
 
                 if (event_state.touches && event_state.touches.length > 1 && touches.length > 1) {
