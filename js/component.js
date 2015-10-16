@@ -1,6 +1,4 @@
-//if (window.location.protocol == 'file:') {
-//    alert('To test this demo properly please use a local server such as XAMPP or WAMP. See README.md for more details.');
-//}
+
 (function ($) {
     $.resizeableImage = function (image_target) {
         // Some variable and settings
@@ -54,6 +52,10 @@
             });
             resize_canvas.width = orig_src.width;
             resize_canvas.height = orig_src.height;
+            // setup cropbox position.
+            transparentOverlay(0.6);
+            cropboxPos();
+
             // FIND SIZE FIT WITH CROPBOX
             // Get croping box size.
             var box_width = $overlay.width(), box_height = $overlay.height();
@@ -86,6 +88,16 @@
                 resetImagePos();
             }
         };
+        cropboxPos=function(){
+          var $component=$('.component'),
+          pos_x=388-(Math.ceil( $overlay.width()/2)),
+          pos_y=260-(Math.ceil( $overlay.height()/2));
+        //  debugger;
+          $overlay.offset({
+              'left': pos_x,
+              'top': pos_y
+          });
+        };
         resetImagePos = function () {
             // reset offset
             var _left = $overlay.offset().left, _top = $overlay.offset().top;
@@ -95,8 +107,8 @@
             });
         };
         initSlide = function (slideNo) {
-            var box_width = $('.overlay').width(),
-              box_height = $('.overlay').height();
+            var box_width = $overlay.width(),
+              box_height = $overlay.height();
             var min_width = (box_width / orig_src.width) * 100;
             var min_height = (box_height / orig_src.height) * 100;
             $("#slider").slider({
@@ -200,7 +212,8 @@
             });
         }
         transparentOverlay = function (opacity) {
-            var _s = $('<style>.overlay::before,.overlay::after,.overlay-inner::after,.overlay-inner::before{opacity:' + opacity + ';}.overlay-inner::after,.overlay-inner::before{height:' + event_state.last_height + 'px;}</style>');
+            //var _s = $('<style>.overlay::before,.overlay::after,.overlay-inner::after,.overlay-inner::before{opacity:' + opacity + ';}.overlay-inner::after,.overlay-inner::before{height:' + event_state.last_height + 'px;}</style>');
+                var _s = $('<style>.overlay::before,.overlay::after,.overlay-inner::after,.overlay-inner::before{opacity:' + opacity + ';}.overlay-inner::after,.overlay-inner::before{height:' + $overlay.height() + 'px;}</style>');
             // re-add style to header
             var styles = $('head>style');
             for (var i = styles.length; i--;) {
@@ -235,8 +248,8 @@
             var _w = (w * (currentScale < 1 ? 100 - (currentScale * 100) : (currentScale - 1) * 100)) / 100;
             var _h = (h * (currentScale < 1 ? 100 - (currentScale * 100) : (currentScale - 1) * 100)) / 100;
 
-            var box_width = $('.overlay').width(),
-              box_height = $('.overlay').height();
+            var box_width = $overlay.width(),
+              box_height = $overlay.height();
 
             if (currentScale > 1) {
                 if (angleInDegrees == 90 || angleInDegrees == 270 || angleInDegrees == -90 || angleInDegrees == -270) {
@@ -291,46 +304,65 @@
         };
         fitwidth = function (e) {
             initSlide(100);
-            var box_width = $('.overlay').width(),
-              box_height = $('.overlay').height(),
-              left = $('.overlay').offset().left,
-              top = $('.overlay').offset().top;
+            var box_width = $overlay.width(),
+            box_height = $overlay.height(),
+            left = $overlay.offset().left,
+            top = $overlay.offset().top,
+            percent_w = ((orig_src.width - box_width) / orig_src.width) * 100;
+            percent_h = orig_src.height - (Math.ceil((orig_src.height * percent_w) / 100));
+
+            if (angleInDegrees == 90 || angleInDegrees == 270 || angleInDegrees == -90 || angleInDegrees == -270) {
+                percent_w = ((orig_src.height - box_width) / orig_src.height) * 100;
+                percent_h = orig_src.width - (Math.ceil((orig_src.width * percent_w) / 100));
+            }
+
             $(image_target).css({
-                'width': (box_width + 5) + 'px'
+                'width': (box_width + 3) + 'px',
+                'height': (percent_h + 3) + 'px'
             });
+
             $container.offset({
                 'left': left,
                 'top': top
             });
+
             if (angleInDegrees != 0) {
-                resize_canvas.width = box_width + 5;
-                resize_canvas.height = box_height + 5;
+                resize_canvas.width = box_width + 3;
+                resize_canvas.height = percent_h + 3;
                 reDrawRotate();
             }
             else {
-                resizeImage((box_width + 5), box_height);
+                resizeImage((box_width + 3), percent_h + 3);
             }
         }
         fitheight = function (e) {
             initSlide(100);
-            var box_width = $('.overlay').width(),
-              box_height = $('.overlay').height(),
-              left = $('.overlay').offset().left,
-              top = $('.overlay').offset().top;
+            var box_width = $overlay.width(),
+              box_height = $overlay.height(),
+              left = $overlay.offset().left,
+              top = $overlay.offset().top,
+              percent_h = ((orig_src.height - box_height) / orig_src.height) * 100,
+              percent_w = orig_src.width - (Math.ceil((orig_src.width * percent_h) / 100));
+
+            if (angleInDegrees == 90 || angleInDegrees == 270 || angleInDegrees == -90 || angleInDegrees == -270) {
+                percent_h = ((orig_src.width - box_height) / orig_src.width) * 100,
+                percent_w = orig_src.height - (Math.ceil((orig_src.height * percent_h) / 100));
+            }
             $(image_target).css({
-                'height': (box_height + 5) + 'px'
+                'height': (box_height + 3) + 'px',
+                'width': (percent_w + 3) + 'px'
             });
             $container.offset({
                 'left': left,
                 'top': top
             });
             if (angleInDegrees != 0) {
-                resize_canvas.width = box_width;
-                resize_canvas.height = box_height + 5;
+                resize_canvas.width = percent_w + 3;
+                resize_canvas.height = box_height + 3;
                 reDrawRotate();
             }
             else {
-                resizeImage(box_width, (box_height + 5));
+                resizeImage(percent_w + 3, (box_height + 3));
             }
         }
         resizeImage = function (width, height) {
@@ -394,19 +426,11 @@
                         $container.offset({
                             'left': _left
                         });
-                    // else {
-                    //     return false;
-                    // }
-                    //  console.log('pic_height : '+ resize_canvas.height+' , box_height : '+c_top);
                     if (_top >= ((c_top - _cTopPic) + 3) && _top <= c_top) {
                         $container.offset({
                             'top': _top
                         });
                     }
-                    // else {
-                    //
-                    //     return false;
-                    // }
                 }
 
                 if (event_state.touches && event_state.touches.length > 1 && touches.length > 1) {
@@ -466,14 +490,19 @@
             try {
                 //Find the part of the image that is inside the crop box
                 var crop_canvas,
-                  left = $('.overlay').offset().left - $container.offset().left,
-                  top = $('.overlay').offset().top - $container.offset().top,
-                  width = $('.overlay').width(),
-                  height = $('.overlay').height();
+                  left = $overlay.offset().left - $container.offset().left,
+                  top = $overlay.offset().top - $container.offset().top,
+                  width = $overlay.width(),
+                  height = $overlay.height();
                 crop_canvas = document.createElement('canvas');
                 crop_canvas.width = width;
                 crop_canvas.height = height;
-                crop_canvas.getContext('2d').drawImage(image_target, left, top, width, height, 0, 0, width, height);
+
+                if (resize_canvas.width < width || resize_canvas.height < height) {
+                    crop_canvas.getContext('2d').drawImage(image_target, left, top, resize_canvas.width, resize_canvas.height, 0, 0, resize_canvas.width, resize_canvas.height);
+                } else {
+                    crop_canvas.getContext('2d').drawImage(image_target, left, top, width, height, 0, 0, width, height);
+                }
                 window.open(crop_canvas.toDataURL("image/png"));
             }
             catch (err) {
@@ -481,7 +510,7 @@
             }
         };
         drawRotated = function () {
-            console.log(angleInDegrees);
+            //  console.log(angleInDegrees);
             if (angleInDegrees == 90 || angleInDegrees == 270 || angleInDegrees == -90 || angleInDegrees == -270) {
                 var temp_w = resize_canvas.width;
                 var temp_h = resize_canvas.height;
@@ -508,7 +537,7 @@
             reDrawRotate();
         };
         reDrawRotate = function () {
-            console.log('w:' + resize_canvas.width + ',h:' + resize_canvas.height);
+            //  console.log('w:' + resize_canvas.width + ',h:' + resize_canvas.height);
             var ctx = resize_canvas.getContext('2d');
             ctx.clearRect(0, 0, resize_canvas.width, resize_canvas.height);
             ctx.save();
